@@ -3,9 +3,10 @@ import clsx from "clsx";
 import { useBuildStore } from "../store/buildStore";
 import ThemeBuilder from "../components/build/ThemeBuilder";
 import CategoryBuilder from "../components/build/CategoryBuilder";
+import RandomBuilder from "../components/build/RandomBuilder";
 import BuildResult from "../components/build/BuildResult";
 import OwnedFilter from "../components/build/OwnedFilter";
-import { generateThemeBuild, generateCategoryBuild, fetchOwnedSurvivorNames } from "../lib/api";
+import { generateThemeBuild, generateCategoryBuild, generateRandomBuild, fetchOwnedSurvivorNames } from "../lib/api";
 import type { BuildMode } from "../types";
 
 const TABS: { id: BuildMode; label: string; desc: string }[] = [
@@ -18,6 +19,11 @@ const TABS: { id: BuildMode; label: string; desc: string }[] = [
     id: "category",
     label: "Category Build",
     desc: "Choose how many perks from each category",
+  },
+  {
+    id: "random",
+    label: "Random",
+    desc: "Spin the wheel — 4 completely random perks, no rules",
   },
 ];
 
@@ -98,6 +104,26 @@ export default function BuilderPage() {
     }
   }, [categorySelections, ownedOnly, getOwnedSurvivors, setIsGenerating, setError, setCurrentBuild]);
 
+  const handleGenerateRandom = useCallback(async () => {
+    setIsGenerating(true);
+    setError(null);
+    try {
+      const owned = await getOwnedSurvivors();
+      const build = await generateRandomBuild({
+        owned_only: ownedOnly,
+        owned_survivors: owned.join(","),
+      });
+      setCurrentBuild(build);
+      setTimeout(() => {
+        document.getElementById("build-result")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } catch (e: any) {
+      setError(e?.response?.data?.detail || "Failed to generate random build.");
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [ownedOnly, getOwnedSurvivors, setIsGenerating, setError, setCurrentBuild]);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       {/* Page header */}
@@ -140,8 +166,10 @@ export default function BuilderPage() {
           <div className="card p-5">
             {buildMode === "theme" ? (
               <ThemeBuilder onGenerate={handleGenerateTheme} />
-            ) : (
+            ) : buildMode === "category" ? (
               <CategoryBuilder onGenerate={handleGenerateCategory} />
+            ) : (
+              <RandomBuilder onGenerate={handleGenerateRandom} />
             )}
           </div>
 
@@ -161,7 +189,11 @@ export default function BuilderPage() {
             <BuildResult
               build={currentBuild}
               onRegenerate={
-                buildMode === "theme" ? handleGenerateTheme : handleGenerateCategory
+                buildMode === "theme"
+                  ? handleGenerateTheme
+                  : buildMode === "category"
+                  ? handleGenerateCategory
+                  : handleGenerateRandom
               }
               isRegenerating={isGenerating}
             />

@@ -56,4 +56,4 @@ export interface PerkStats {
   shrine_perks: string[];
 }
 
-export type BuildMode = "theme" | "category";
+export type BuildMode = "theme" | "category" | "random";

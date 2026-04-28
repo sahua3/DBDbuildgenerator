@@ -37,21 +37,7 @@ BASE_SURVIVORS = {
     "Claudette Morel",
     "Jake Park",
     "Nea Karlsson",
-    "Bill Overbeck",
     "Feng Min",
-    "David King",
-    "Quentin Smith",
-    "Detective Tapp",
-    "Kate Denson",
-    "Adam Francis",
-    "Jeff Johansen",
-    "Jane Romero",
-    "Ash Williams",
-    "Nancy Wheeler",
-    "Steve Harrington",
-    "Yui Kimura",
-    "Zarina Kassir",
-    "Cheryl Mason",
 }
 
 

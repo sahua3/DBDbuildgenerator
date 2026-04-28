@@ -117,6 +117,40 @@ async def generate_from_categories(
     return result
 
 
+@router.post("/random", response_model=BuildResponse)
+async def generate_random_build(
+    owned_only: bool = False,
+    owned_survivors: str = "",
+    db: AsyncSession = Depends(get_db),
+):
+    """Pick 4 completely random perks — no AI explanation, instant response."""
+    import random
+    from sqlalchemy import func
+
+    stmt = select(Perk).order_by(func.random()).limit(50)
+
+    if owned_only and owned_survivors:
+        names = [n.strip() for n in owned_survivors.split(",") if n.strip()]
+        stmt = select(Perk).where(
+            (Perk.owner == None) | (Perk.owner.in_(names))  # noqa
+        ).order_by(func.random()).limit(50)
+
+    candidates = (await db.execute(stmt)).scalars().all()
+
+    if len(candidates) < 4:
+        raise HTTPException(status_code=422, detail="Not enough perks in database.")
+
+    picked = random.sample(list(candidates), 4)
+    perk_dicts = [_perk_to_dict(p) for p in picked]
+
+    return {
+        "perks": perk_dicts,
+        "explanation": "",
+        "theme": None,
+        "generation_mode": "random",
+    }
+
+
 @router.post("/save", response_model=SavedBuildResponse)
 async def save_build(
     request: SaveBuildRequest,

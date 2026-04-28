@@ -103,6 +103,14 @@ export const fetchShrine = async (): Promise<ShrineResponse> => {
   return data;
 };
 
+export const generateRandomBuild = async (params?: {
+  owned_only?: boolean;
+  owned_survivors?: string;
+}): Promise<BuildResponse> => {
+  const { data } = await api.post("/builds/random", null, { params });
+  return data;
+};
+
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
 export const triggerNightlightSync = async () => {

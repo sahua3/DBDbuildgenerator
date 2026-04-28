@@ -43,17 +43,26 @@ export default function BuildResult({ build, onRegenerate, isRegenerating }: Bui
     }
   };
 
+  const showStrategyGuide =
+    build.generation_mode !== "random" && Boolean(build.explanation);
+
+  const modeLabel =
+    build.generation_mode === "theme"
+      ? "Theme build"
+      : build.generation_mode === "random"
+      ? "Random build"
+      : "Category build";
+
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Build header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display text-3xl tracking-widest text-white uppercase">
-            {build.theme || "Your Build"}
+            {build.theme || (build.generation_mode === "random" ? "Random Build" : "Your Build")}
           </h2>
           <p className="text-ash-500 text-sm font-mono mt-1">
-            {build.generation_mode === "theme" ? "Theme build" : "Category build"} ·{" "}
-            {build.perks.length} perks
+            {modeLabel} · {build.perks.length} perks
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -63,10 +72,7 @@ export default function BuildResult({ build, onRegenerate, isRegenerating }: Bui
               disabled={isRegenerating}
               className="btn-ghost flex items-center gap-2 text-sm"
             >
-              <RefreshCw
-                size={14}
-                className={clsx(isRegenerating && "animate-spin")}
-              />
+              <RefreshCw size={14} className={clsx(isRegenerating && "animate-spin")} />
               Reroll
             </button>
           )}
@@ -111,66 +117,68 @@ export default function BuildResult({ build, onRegenerate, isRegenerating }: Bui
         ))}
       </div>
 
-      {/* Explanation panel */}
-      <div className="card overflow-hidden">
-        <button
-          onClick={() => setShowExplanation(!showExplanation)}
-          className="w-full flex items-center justify-between p-4 hover:bg-ash-900/30 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-blood-400" />
-            <span className="font-display tracking-wider text-white text-lg">
-              STRATEGY GUIDE
-            </span>
-          </div>
-          {showExplanation ? (
-            <ChevronUp size={16} className="text-ash-500" />
-          ) : (
-            <ChevronDown size={16} className="text-ash-500" />
-          )}
-        </button>
-
-        {showExplanation && (
-          <>
-            <div className="fog-line" />
-            <div className="p-5 prose-custom">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  h2: ({ children }) => (
-                    <h2 className="font-display text-xl tracking-wider text-white mt-6 mb-2 first:mt-0">
-                      {children}
-                    </h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="font-body font-semibold text-fog-light mt-4 mb-1.5">
-                      {children}
-                    </h3>
-                  ),
-                  p: ({ children }) => (
-                    <p className="text-ash-300 text-sm leading-relaxed mb-3">
-                      {children}
-                    </p>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="text-white font-semibold">{children}</strong>
-                  ),
-                  li: ({ children }) => (
-                    <li className="text-ash-300 text-sm leading-relaxed mb-1 ml-4 list-disc">
-                      {children}
-                    </li>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="mb-3 space-y-0.5">{children}</ul>
-                  ),
-                }}
-              >
-                {build.explanation}
-              </ReactMarkdown>
+      {/* Explanation panel — hidden for random builds */}
+      {showStrategyGuide && (
+        <div className="card overflow-hidden">
+          <button
+            onClick={() => setShowExplanation(!showExplanation)}
+            className="w-full flex items-center justify-between p-4 hover:bg-ash-900/30 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-blood-400" />
+              <span className="font-display tracking-wider text-white text-lg">
+                STRATEGY GUIDE
+              </span>
             </div>
-          </>
-        )}
-      </div>
+            {showExplanation ? (
+              <ChevronUp size={16} className="text-ash-500" />
+            ) : (
+              <ChevronDown size={16} className="text-ash-500" />
+            )}
+          </button>
+
+          {showExplanation && (
+            <>
+              <div className="fog-line" />
+              <div className="p-5">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h2: ({ children }) => (
+                      <h2 className="font-display text-xl tracking-wider text-white mt-6 mb-2 first:mt-0">
+                        {children}
+                      </h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className="font-body font-semibold text-fog-light mt-4 mb-1.5">
+                        {children}
+                      </h3>
+                    ),
+                    p: ({ children }) => (
+                      <p className="text-ash-300 text-sm leading-relaxed mb-3">
+                        {children}
+                      </p>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="text-white font-semibold">{children}</strong>
+                    ),
+                    li: ({ children }) => (
+                      <li className="text-ash-300 text-sm leading-relaxed mb-1 ml-4 list-disc">
+                        {children}
+                      </li>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="mb-3 space-y-0.5">{children}</ul>
+                    ),
+                  }}
+                >
+                  {build.explanation}
+                </ReactMarkdown>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
