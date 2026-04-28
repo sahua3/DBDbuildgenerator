@@ -2,6 +2,8 @@
 
 A full-stack Dead by Daylight survivor build generator with AI-powered recommendations, real-time perk data from Nightlight.gg, and weekly Shrine of Secrets tracking.
 
+NOTE: If there is no API key in the env, the program will give hardcoded descriptions on how to use the perk sets
+
 ## Features
 
 - **Theme-based build generation** — Describe a playstyle, get a meta build
@@ -9,7 +11,16 @@ A full-stack Dead by Daylight survivor build generator with AI-powered recommend
 - **Weighted perk graph** — Perk co-occurrence graph built from Nightlight.gg top builds
 - **Shrine of Secrets** — Weekly shrine scraping so you know what's purchasable
 - **Owned survivor filter** — Only show perks you own
+- **Random build generator** - Selects 4 random perks to create a random build
 - **AI explanations** — Strategy breakdown for every build
+
+## To Do
+
+- Add perk icons via wiki scraping
+- Add a killer build generator
+- Fix Shrine of Secrets scraping
+- Fix categorization of base survivors
+- Reformat the perk descriptions to be cleaner
 
 ## Tech Stack
 
