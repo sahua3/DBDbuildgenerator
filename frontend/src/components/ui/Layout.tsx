@@ -29,7 +29,7 @@ export default function Layout() {
             </div>
             <div>
               <span className="font-display text-2xl tracking-widest text-white">
-                DEAD BUILD
+                DBDBUILD
               </span>
               <span className="font-display text-2xl tracking-widest text-blood-500">
                 .GG
