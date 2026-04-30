@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import clsx from "clsx";
 import { useBuildStore } from "../store/buildStore";
 import ThemeBuilder from "../components/build/ThemeBuilder";
@@ -6,7 +6,7 @@ import CategoryBuilder from "../components/build/CategoryBuilder";
 import RandomBuilder from "../components/build/RandomBuilder";
 import BuildResult from "../components/build/BuildResult";
 import OwnedFilter from "../components/build/OwnedFilter";
-import { generateThemeBuild, generateCategoryBuild, generateRandomBuild, fetchOwnedSurvivorNames } from "../lib/api";
+import { generateThemeBuild, generateCategoryBuild, generateRandomBuild, fetchOwnedSurvivorNames, submitFeedback } from "../lib/api";
 import type { BuildMode } from "../types";
 
 const TABS: { id: BuildMode; label: string; desc: string }[] = [
@@ -28,6 +28,9 @@ const TABS: { id: BuildMode; label: string; desc: string }[] = [
 ];
 
 export default function BuilderPage() {
+  const prevBuildRef = useRef<string[] | null>(null);
+  const isRerollRef = useRef(false);
+
   const {
     buildMode,
     setBuildMode,
@@ -61,11 +64,17 @@ export default function BuilderPage() {
     setError(null);
     try {
       const owned = await getOwnedSurvivors();
+      // Send reroll signal for previous build
+      if (prevBuildRef.current) {
+        submitFeedback({ perk_ids: prevBuildRef.current, event_type: "rerolled", generation_mode: "theme", theme: themeInput.trim() }).catch(() => {});
+      }
       const build = await generateThemeBuild({
         theme: themeInput.trim(),
         owned_only: ownedOnly,
         owned_survivors: owned,
-      });
+      }, isRerollRef.current);
+      prevBuildRef.current = build.perks.map(p => p.id);
+      isRerollRef.current = true;  // all subsequent generates are rerolls
       setCurrentBuild(build);
       // Scroll to result on mobile
       setTimeout(() => {
@@ -92,7 +101,7 @@ export default function BuilderPage() {
         category_selections: filtered,
         owned_only: ownedOnly,
         owned_survivors: owned,
-      });
+      }, isRerollRef.current);
       setCurrentBuild(build);
       setTimeout(() => {
         document.getElementById("build-result")?.scrollIntoView({ behavior: "smooth" });
@@ -144,7 +153,7 @@ export default function BuilderPage() {
             {TABS.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setBuildMode(tab.id)}
+                onClick={() => { setBuildMode(tab.id); isRerollRef.current = false; }}
                 className={clsx(
                   "flex-1 px-3 py-2.5 text-sm font-body font-medium transition-all duration-200",
                   buildMode === tab.id

@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { Swords, BookMarked, Users, FlameKindling, Skull } from "lucide-react";
+import { Swords, BookMarked, Users, FlameKindling, Skull, BarChart2 } from "lucide-react";
 import clsx from "clsx";
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { to: "/shrine", label: "Shrine", icon: FlameKindling },
   { to: "/roster", label: "Roster", icon: Users },
   { to: "/saved", label: "Saved", icon: BookMarked },
+  { to: "/evaluation", label: "Eval", icon: BarChart2 },
 ];
 
 export default function Layout() {
@@ -29,7 +30,7 @@ export default function Layout() {
             </div>
             <div>
               <span className="font-display text-2xl tracking-widest text-white">
-                DBDBUILD
+                DEAD BUILD
               </span>
               <span className="font-display text-2xl tracking-widest text-blood-500">
                 .GG

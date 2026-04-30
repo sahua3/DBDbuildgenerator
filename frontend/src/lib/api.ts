@@ -58,21 +58,19 @@ export const updateSurvivorOwnership = async (
 
 // ── Builds ────────────────────────────────────────────────────────────────────
 
-export const generateThemeBuild = async (payload: {
-  theme: string;
-  owned_only: boolean;
-  owned_survivors: string[];
-}): Promise<BuildResponse> => {
-  const { data } = await api.post("/builds/theme", payload);
+export const generateThemeBuild = async (
+  payload: { theme: string; owned_only: boolean; owned_survivors: string[] },
+  reroll = false
+): Promise<BuildResponse> => {
+  const { data } = await api.post("/builds/theme", payload, { params: { reroll } });
   return data;
 };
 
-export const generateCategoryBuild = async (payload: {
-  category_selections: Record<string, number>;
-  owned_only: boolean;
-  owned_survivors: string[];
-}): Promise<BuildResponse> => {
-  const { data } = await api.post("/builds/category", payload);
+export const generateCategoryBuild = async (
+  payload: { category_selections: Record<string, number>; owned_only: boolean; owned_survivors: string[] },
+  reroll = false
+): Promise<BuildResponse> => {
+  const { data } = await api.post("/builds/category", payload, { params: { reroll } });
   return data;
 };
 
@@ -108,6 +106,25 @@ export const generateRandomBuild = async (params?: {
   owned_survivors?: string;
 }): Promise<BuildResponse> => {
   const { data } = await api.post("/builds/random", null, { params });
+  return data;
+};
+
+export const submitFeedback = async (payload: {
+  perk_ids: string[];
+  event_type: string;
+  generation_mode?: string;
+  theme?: string;
+}): Promise<void> => {
+  await api.post("/analytics/feedback", payload);
+};
+
+export const fetchSimilarPerks = async (perkId: string, topN = 6) => {
+  const { data } = await api.get(`/analytics/similar/${perkId}?top_n=${topN}`);
+  return data;
+};
+
+export const fetchEvaluation = async (nBuilds = 100) => {
+  const { data } = await api.get(`/analytics/evaluation?n_builds=${nBuilds}`);
   return data;
 };
 

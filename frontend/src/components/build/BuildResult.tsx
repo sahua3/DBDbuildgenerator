@@ -43,8 +43,8 @@ export default function BuildResult({ build, onRegenerate, isRegenerating }: Bui
     }
   };
 
-  const showStrategyGuide =
-    build.generation_mode !== "random" && Boolean(build.explanation);
+  const isRandom = build.generation_mode === "random";
+  const hasExplanation = !isRandom && Boolean(build.explanation);
 
   const modeLabel =
     build.generation_mode === "theme"
@@ -55,11 +55,11 @@ export default function BuildResult({ build, onRegenerate, isRegenerating }: Bui
 
   return (
     <div className="space-y-6 animate-fade-up">
-      {/* Build header */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display text-3xl tracking-widest text-white uppercase">
-            {build.theme || (build.generation_mode === "random" ? "Random Build" : "Your Build")}
+            {build.theme || (isRandom ? "Random Build" : "Your Build")}
           </h2>
           <p className="text-ash-500 text-sm font-mono mt-1">
             {modeLabel} · {build.perks.length} perks
@@ -117,8 +117,8 @@ export default function BuildResult({ build, onRegenerate, isRegenerating }: Bui
         ))}
       </div>
 
-      {/* Explanation panel — hidden for random builds */}
-      {showStrategyGuide && (
+      {/* Strategy guide — hidden for random builds */}
+      {hasExplanation && (
         <div className="card overflow-hidden">
           <button
             onClick={() => setShowExplanation(!showExplanation)}
@@ -130,11 +130,10 @@ export default function BuildResult({ build, onRegenerate, isRegenerating }: Bui
                 STRATEGY GUIDE
               </span>
             </div>
-            {showExplanation ? (
-              <ChevronUp size={16} className="text-ash-500" />
-            ) : (
-              <ChevronDown size={16} className="text-ash-500" />
-            )}
+            {showExplanation
+              ? <ChevronUp size={16} className="text-ash-500" />
+              : <ChevronDown size={16} className="text-ash-500" />
+            }
           </button>
 
           {showExplanation && (

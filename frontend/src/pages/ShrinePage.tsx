@@ -38,7 +38,7 @@ export default function ShrinePage() {
             </h1>
           </div>
           <p className="text-ash-400 font-body">
-            Weekly rotating perks available for Bloodpoints — no DLC required
+            Weekly rotating perks available for Iridescent Shards — no DLC required
           </p>
         </div>
 

@@ -4,6 +4,7 @@ import BuilderPage from "./pages/BuilderPage";
 import SavedBuildsPage from "./pages/SavedBuildsPage";
 import RosterPage from "./pages/RosterPage";
 import ShrinePage from "./pages/ShrinePage";
+import EvaluationPage from "./pages/EvaluationPage";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/saved" element={<SavedBuildsPage />} />
           <Route path="/roster" element={<RosterPage />} />
           <Route path="/shrine" element={<ShrinePage />} />
+          <Route path="/evaluation" element={<EvaluationPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,8 @@
+import { useState } from "react";
 import clsx from "clsx";
+import { ChevronDown } from "lucide-react";
 import { Flame } from "lucide-react";
+import SimilarPerks from "./SimilarPerks";
 import type { Perk } from "../../types";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -47,6 +50,8 @@ export default function PerkCard({
   showDescription = true,
   className,
 }: PerkCardProps) {
+  const [showSimilar, setShowSimilar] = useState(false);
+
   return (
     <div
       className={clsx(
@@ -157,6 +162,24 @@ export default function PerkCard({
           </span>
         )}
       </div>
+
+      {/* "Users also use" — only on large cards with saved build data */}
+      {size === "lg" && (
+        <div className="mt-3 pt-3 border-t border-[var(--color-border)]">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowSimilar(!showSimilar); }}
+            className="flex items-center gap-1.5 text-xs font-mono text-ash-500 hover:text-ash-300 transition-colors"
+          >
+            <ChevronDown size={12} className={clsx("transition-transform duration-200", showSimilar && "rotate-180")} />
+            Users also use...
+          </button>
+          {showSimilar && (
+            <div className="mt-3">
+              <SimilarPerks perk={perk} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -39,13 +39,15 @@ def _perk_to_dict(perk) -> dict:
 @router.post("/theme", response_model=BuildResponse)
 async def generate_from_theme(
     request: ThemeBuildRequest,
+    reroll: bool = False,
     db: AsyncSession = Depends(get_db),
 ):
-    # Cache key based on request params
+    # Cache key based on request params — skip cache on reroll
     cache_key = f"build:theme:{hashlib.md5(json.dumps(request.dict(), sort_keys=True).encode()).hexdigest()}"
-    cached = await cache_get(cache_key)
-    if cached:
-        return cached
+    if not reroll:
+        cached = await cache_get(cache_key)
+        if cached:
+            return cached
 
     perks = await generate_theme_build(
         db=db,
@@ -70,6 +72,14 @@ async def generate_from_theme(
         "generation_mode": "theme",
     }
 
+    # Record feedback event
+    from app.services.feedback import record_event, mark_ignored_builds
+    perk_ids = [p["id"] for p in perk_dicts]
+    sorted_key = ",".join(sorted(perk_ids))
+    await mark_ignored_builds(db, except_key=sorted_key)
+    await record_event(db, perk_ids, "generated", "theme", request.theme)
+    await db.commit()
+
     await cache_set(cache_key, result, ttl=600)
     return result
 
@@ -77,6 +87,7 @@ async def generate_from_theme(
 @router.post("/category", response_model=BuildResponse)
 async def generate_from_categories(
     request: CategoryBuildRequest,
+    reroll: bool = False,
     db: AsyncSession = Depends(get_db),
 ):
     if request.total_perks() != 4:
@@ -86,9 +97,10 @@ async def generate_from_categories(
         )
 
     cache_key = f"build:cat:{hashlib.md5(json.dumps(request.dict(), sort_keys=True).encode()).hexdigest()}"
-    cached = await cache_get(cache_key)
-    if cached:
-        return cached
+    if not reroll:
+        cached = await cache_get(cache_key)
+        if cached:
+            return cached
 
     perks = await generate_category_build(
         db=db,
@@ -164,6 +176,14 @@ async def save_build(
         ).scalar_one_or_none()
         if perk:
             perk_objects.append(perk)
+
+    # Record positive feedback signal
+    from app.services.feedback import record_event
+    await record_event(
+        db, request.perk_ids, "saved",
+        generation_mode=request.generation_mode,
+        theme=request.theme,
+    )
 
     build = SavedBuild(
         name=request.name,

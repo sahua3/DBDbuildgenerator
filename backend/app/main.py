@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.db.session import init_db
 from app.services.graph import load_graph_from_db
 from app.db.session import AsyncSessionLocal
-from app.api import perks, builds, survivors, shrine
+from app.api import perks, builds, survivors, shrine, analytics
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ app.include_router(perks.router)
 app.include_router(builds.router)
 app.include_router(survivors.router)
 app.include_router(shrine.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health")

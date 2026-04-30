@@ -185,16 +185,22 @@ async def generate_theme_build(
             continue
 
         if graph and selected_perks:
-            # Score each candidate by its graph affinity to already-selected perks
+            # Score each candidate by its graph affinity + user feedback affinity
+            from app.services.feedback import get_affinity_blend_weight, get_perk_affinity
+            affinity_blend = await get_affinity_blend_weight(db)
             scored = []
             for p in candidates:
-                affinity = 0.0
+                graph_affinity = 0.0
+                user_affinity = 0.0
                 for already in selected_perks:
                     pid, aid = str(p.id), str(already.id)
                     if graph.has_edge(pid, aid):
-                        affinity += graph[pid][aid]["weight"]
-                # Blend affinity + category weight
-                score = affinity * 0.6 + p.category_weight * 0.4
+                        graph_affinity += graph[pid][aid]["weight"]
+                    if affinity_blend > 0:
+                        user_affinity += await get_perk_affinity(db, pid, aid)
+                # Blend: nightlight graph + user behavior + category weight
+                nl_weight = 1.0 - affinity_blend
+                score = (graph_affinity * nl_weight + user_affinity * affinity_blend) * 0.7 + p.category_weight * 0.3
                 scored.append((p, score))
             scored.sort(key=lambda x: x[1], reverse=True)
             # Pick from top-5 with some randomness
@@ -235,14 +241,21 @@ async def generate_category_build(
             continue
 
         if graph and selected_perks:
+            from app.services.feedback import get_affinity_blend_weight, get_perk_affinity
+            affinity_blend = await get_affinity_blend_weight(db)
+            nl_weight = 1.0 - affinity_blend
             scored = []
             for p in candidates:
-                affinity = sum(
+                graph_affinity = sum(
                     graph[str(p.id)][str(a.id)]["weight"]
                     for a in selected_perks
                     if graph.has_edge(str(p.id), str(a.id))
                 )
-                score = affinity * 0.6 + p.category_weight * 0.4
+                user_affinity = 0.0
+                if affinity_blend > 0:
+                    for a in selected_perks:
+                        user_affinity += await get_perk_affinity(db, str(p.id), str(a.id))
+                score = (graph_affinity * nl_weight + user_affinity * affinity_blend) * 0.7 + p.category_weight * 0.3
                 scored.append((p, score))
             scored.sort(key=lambda x: x[1], reverse=True)
             top_pool = [p for p, _ in scored[:max(count * 3, 5)]]
