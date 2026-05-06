@@ -8,6 +8,7 @@ const navItems = [
   { to: "/roster", label: "Roster", icon: Users },
   { to: "/saved", label: "Saved", icon: BookMarked },
   { to: "/evaluation", label: "Eval", icon: BarChart2 },
+  { to: "/todo", label: "TODO", icon: BarChart2 },
 ];
 
 export default function Layout() {
@@ -30,7 +31,7 @@ export default function Layout() {
             </div>
             <div>
               <span className="font-display text-2xl tracking-widest text-white">
-                DEAD BUILD
+                DBDBUILD
               </span>
               <span className="font-display text-2xl tracking-widest text-blood-500">
                 .GG
